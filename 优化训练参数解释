@@ -129,17 +129,17 @@ size=3
 stride=1
 pad=1
 activation=leaky
-shortcut				#部分是卷积的跨层连接，就像Resnet中使用的一样，
-					#参数from是−3，意思是shortcut的输出是通过与先前的倒数第三层网络相加而得到。跨越连接。
+shortcut		#部分是卷积的跨层连接，就像Resnet中使用的一样，
+			#参数from是−3，意思是shortcut的输出是通过与先前的倒数第三层网络相加而得到。跨越连接。
 [shortcut]
 from=-3
 activation=linear
-				#输入与输出：输入与输出一般保持一致，并且不进行其他操作，只是求差。
-				#处理操作：res层来源于resnet，为了解决网络的梯度弥散或者梯度爆炸的现象，
-				#提出将深层神经网络的逐层训练改为逐阶段训练，将深层神经网络分为若干个子段，每个小段包含比较浅的网络层数，
-				#然后用shortcut的连接方式使得每个小段对于残差进行训练，每一个小段学习总差（总的损失）的一部分，
-				#最终达到总体较小的loss，
-				#同时，很好的控制梯度的传播，避免出现梯度消失或者爆炸等不利于训练的情形。
+			#输入与输出：输入与输出一般保持一致，并且不进行其他操作，只是求差。
+			#处理操作：res层来源于resnet，为了解决网络的梯度弥散或者梯度爆炸的现象，
+			#提出将深层神经网络的逐层训练改为逐阶段训练，将深层神经网络分为若干个子段，每个小段包含比较浅的网络层数，
+			#然后用shortcut的连接方式使得每个小段对于残差进行训练，每一个小段学习总差（总的损失）的一部分，
+			#最终达到总体较小的loss，
+			#同时，很好的控制梯度的传播，避免出现梯度消失或者爆炸等不利于训练的情形。
 	# Downsample	
 [convolutional]
 batch_normalize=1
@@ -189,7 +189,7 @@ activation=leaky
 from=-3
 activation=linear
 
-					# Downsample
+				############### Downsample
 					//下采样
 [convolutional]
 batch_normalize=1
@@ -360,7 +360,7 @@ activation=leaky
 from=-3
 activation=linear
 
-				# Downsample
+		################### Downsample
 
 [convolutional]
 batch_normalize=1
@@ -535,7 +535,7 @@ activation=leaky
 from=-3
 activation=linear
 
-				# Downsample
+			################# Downsample
 
 [convolutional]
 batch_normalize=1
@@ -625,7 +625,7 @@ activation=leaky
 from=-3
 activation=linear
 
-				######################上采样开始
+				######################上采样开始#########################
 
 [convolutional]
 batch_normalize=1
@@ -674,51 +674,53 @@ stride=1
 pad=1
 filters=1024
 activation=leaky
-				#******************重点来了******************************
+				#******************重点来了********************
 [convolutional]
 size=1
 stride=1
 pad=1
 filters=18  
-		#每一个[region/yolo]层前的最后一个卷积层中的 filters=num(yolo层个数)*(classes+5) ,5的意义是5个坐标，论文中的tx,ty,tw,th,po
+		         #每一个[region/yolo]层前的最后一个卷积层中的 filters=num(yolo层个数)*(classes+5) ,5的意义是5个坐标，
+			 #论文中的tx,ty,tw,th,po
 activation=linear
 
 
-[yolo]                  	#在yoloV2中yolo层叫region层,yolo2,3各自叫法不同
-mask = 6,7,8 			#训练框
+[yolo]                     #在yoloV2中yolo层叫region层,yolo2,3各自叫法不同
+mask = 6,7,8 		   #训练框
 mask的值是0,1,2，		#这意味着使用第一，第二和第三个anchor。 这是有道理的，因为检测层的每个单元预测3个box。 总共有三个检测层，共计9个anchor，
 anchors = 10,13,  16,30,  33,23,  30,61,  62,45,  59,119,  116,90,  156,198,  373,326
-					'''   
-					      1.anchors是可以事先通过cmd指令计算出来的，是和图片数量，width,height以及cluster
-						 (应该就是下面的num的值，即想要使用的anchors的数量)相关的预选框，可以手工挑选，也可以通过k means 从训练样本中学出
-						  2.聚类的脚本放在github中
-						  3. 预测框的初始宽高，第一个是w，第二个是h，总数量是num*2
-					'''
+			'''   
+			1.anchors是可以事先通过cmd指令计算出来的，是和图片数量，width,height以及cluster
+			(应该就是下面的num的值，即想要使用的anchors的数量)相关的预选框，可以手工挑选，也可以通过k means 从训练样本中学出
+			2.聚类的脚本放在github中
+			3. 预测框的初始宽高，第一个是w，第二个是h，总数量是num*2
+			'''
 classes=1
-num=9     			#每个grid预测的BoundingBox num/yolo层个数
+num=9     		#每个grid预测的BoundingBox num/yolo层个数
 jitter=.3    		'''
-					利用数据抖动产生更多数据，YOLOv2中使用的是crop，filp，以及net层的angle，flip是随机的，
-					crop就是jitter的参数，tiny-yolo-voc.cfg中jitter=.2，就是在0~0.2中进行cr
-					'''
+			利用数据抖动产生更多数据，YOLOv2中使用的是crop，filp，以及net层的angle，flip是随机的，
+			crop就是jitter的参数，tiny-yolo-voc.cfg中jitter=.2，就是在0~0.2中进行cr
+			'''
 
 ignore_thresh = .5
-					'''
-					参数解释：ignore_thresh 指得是参与计算的IOU阈值大小。当预测的检测框与ground true的IOU大于ignore_thresh的时候，
-					不会参与loss的计算，否则，检测框将会参与损失计算。
-					参数目的和理解：目的是控制参与loss计算的检测框的规模，当ignore_thresh过于大，
-					接近于1的时候，那么参与检测框回归loss的个数就会比较少，同时也容易造成过拟合；而如果ignore_thresh设置的过于小，
-					那么参与计算的会数量规模就会很大。同时也容易在进行检测框回归的时候造成欠拟合。
-					参数设置：一般选取0.5-0.7之间的一个值，之前的计算基础都是小尺度（13*13）用的是0.7，（26*26）用的是0.5。这次先将0.5更改为0.7。
-					'''
+			'''
+			参数解释：ignore_thresh 指得是参与计算的IOU阈值大小。当预测的检测框与ground true的IOU大于ignore_thresh的时候，
+			不会参与loss的计算，否则，检测框将会参与损失计算。
+			参数目的和理解：目的是控制参与loss计算的检测框的规模，当ignore_thresh过于大，
+			接近于1的时候，那么参与检测框回归loss的个数就会比较少，同时也容易造成过拟合；而如果ignore_thresh设置的过于小，
+			那么参与计算的会数量规模就会很大。同时也容易在进行检测框回归的时候造成欠拟合。
+			参数设置：一般选取0.5-0.7之间的一个值，之前的计算基础都是小尺度（13*13）用的是0.7，（26*26）用的是0.5。
+			这次先将0.5更改为0.7。
+			'''
 truth_thresh = 1
-random=1                #random设置成1，可以增加检测精度precision
-   //路由层             #进行多尺度训练
+random=1                 #random设置成1，可以增加检测精度precision
+   //路由层              #进行多尺度训练
 [route]
 layers = -4
-						#当属性只有一个值时，它会输出由该值索引的网络层的特征图。 
-						#在我们的示例中，它是−4，所以层级将输出路由层之前第四个层的特征图。
-						#当图层有两个值时，它会返回由其值所索引的图层的连接特征图。 在我们的例子中，它是−−1,61，
-						#并且该图层将输出来自上一层（-1）和第61层的特征图，并沿深度的维度连接。
+			#当属性只有一个值时，它会输出由该值索引的网络层的特征图。 
+			#在我们的示例中，它是−4，所以层级将输出路由层之前第四个层的特征图。
+			#当图层有两个值时，它会返回由其值所索引的图层的连接特征图。 在我们的例子中，它是−−1,61，
+			#并且该图层将输出来自上一层（-1）和第61层的特征图，并沿深度的维度连接。
 [convolutional]
 batch_normalize=1
 filters=256
@@ -807,7 +809,7 @@ jitter=.3
 
 ignore_thresh = .5  	#决定是否需要计算IOU误差的参数，大于thresh，IOU误差不会夹在cost function中
 truth_thresh = 1
-random=1    			#多尺度如果为1，每次迭代图片大小随机从320到608，步长为32，如果为0，每次训练大小与输入大小一致
+random=1    		#多尺度如果为1，每次迭代图片大小随机从320到608，步长为32，如果为0，每次训练大小与输入大小一致
 [route]
 layers = -4
 
@@ -903,27 +905,24 @@ random=1
 	所有这些 batch 个样本又被均分为 subdivision = 8 次送入网络参与训练，以减轻内存占用的压力）
 	'''
 
-•   9798： 				#指示当前训练的迭代次数
-•   0.370096： 			#是总体的Loss(损失）
+•   9798： 		#指示当前训练的迭代次数
+•   0.370096： 		#是总体的Loss(损失）
 •   0.451929 avg：  	#是平均Loss，这个数值应该越低越好，一般来说一旦这个数值低于0.060730 avg就可以终止训练了。
 •   0.001000 rate： 	#代表当前的学习率，是在.cfg文件中定义的。
-•   3.300000 seconds：  #表示当前批次训练花费的总时间。
+•   3.300000 seconds：   #表示当前批次训练花费的总时间。
 •   627072 images： 	#这一行最后的这个数值是9798*64的大小，表示到目前为止，参与训练的图片的总量。
 
-•   Region Avg IOU: 0.326577：  #表示在当前subdivision内的图片的平均IOU，代表预测的矩形框和真实目标的交集与并集之比，这里是32.66%，这个模型需要进一步的训练。
-•   Class: 0.742537： 			#标注物体分类的正确率，期望该值趋近于1。
-•   Obj: 0.033966： 			#越接近1越好。
-•   No Obj: 0.000793： 			#期望该值越来越小，但不为零。
-•   Avg Recall: 0.12500： 		#是在recall/count中定义的，是当前模型在所有subdivision图片中检测出的正样本与实际的正样本的比值。
-								#在本例中，只有八分之一的正样本被正确的检测到。（和最开始初定的阈值有关系）
-•   count: 8：                  #count后的值是所有的当前subdivision图片（本例中一共8张）中包含正样本的图片的数量。
-								#在输出log中的其他行中，可以看到其他subdivision也有的只含有6或7个正样本，说明在subdivision中含有不含检测对象的图片。
-./darknet detector train cfg/voc.data cfg/yolov3-voc.cfg voc/ darknet53.conv.74 -gpus 0,1,2,3		#这句话的意思是采用迁移学习的权重使用4个GPU训练自己数据
---------------------- 
-作者：ll_sunsmile 
-来源：CSDN 
-原文：https://blog.csdn.net/ll_master/article/details/81487844 
-版权声明：本文为博主原创文章，转载请附上博文链接！
+•   Region Avg IOU: 0.326577：   #表示在当前subdivision内的图片的平均IOU，代表预测的矩形框和真实目标的交集与并集之比，这里是32.66%，
+				 #这个模型需要进一步的训练。
+•   Class: 0.742537： 		#标注物体分类的正确率，期望该值趋近于1。
+•   Obj: 0.033966： 		#越接近1越好。
+•   No Obj: 0.000793： 		#期望该值越来越小，但不为零。
+•   Avg Recall: 0.12500： 	#是在recall/count中定义的，是当前模型在所有subdivision图片中检测出的正样本与实际的正样本的比值。
+			#在本例中，只有八分之一的正样本被正确的检测到。（和最开始初定的阈值有关系）
+•   count: 8：          #count后的值是所有的当前subdivision图片（本例中一共8张）中包含正样本的图片的数量。
+			#在输出log中的其他行中，可以看到其他subdivision也有的只含有6或7个正样本，说明在subdivision中含有不含检测对象的图片。
+./darknet detector train cfg/voc.data cfg/yolov3-voc.cfg voc/ darknet53.conv.74 -gpus 0,1,2,3		
+                      #这句话的意思是采用迁移学习的权重使用4个GPU训练自己数据
 
 参考github：https://timebutt.github.io/static/understanding-yolov2-training-output/
-															 20190125 
+													20190125 

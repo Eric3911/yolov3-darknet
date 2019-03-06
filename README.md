@@ -1,5 +1,5 @@
 
-Darknet for your YOLOv3
+#Darknet版YOLOv3训练教程
 
 该教程基于darknet训练的模型，使用了cuda9.0用于加速张量计算
 这个框架很有研究价值可以修改成为自己内部需要的计算框架。

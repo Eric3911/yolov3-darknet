@@ -25,3 +25,5 @@ https://github.com/sufeidechabei/gluon-mobilenet-yolov3
 
 NCS2上部署yolo_tiny
 https://mp.weixin.qq.com/s/kjii53YgOSFCA84Tbl6K0Q
+
+

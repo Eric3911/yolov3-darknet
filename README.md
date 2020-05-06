@@ -27,6 +27,5 @@ NCS2上部署yolo_tiny，这个模型是为了让工程化变得简单后续我�
 https://mp.weixin.qq.com/s/kjii53YgOSFCA84Tbl6K0Q
 
 
-![](https://github.com/Eric3911/Darknet-YOLOv3/blob/master/pred_input.jpg)
-![](https://github.com/Eric3911/Darknet-YOLOv3/blob/master/pred_output.jpg)
-
+![输入测试](https://github.com/Eric3911/Darknet-YOLOv3/blob/master/pred_input.jpg)
+![识别结果](https://github.com/Eric3911/Darknet-YOLOv3/blob/master/pred_output.jpg)

@@ -1,0 +1,115 @@
+#include "shortcut_layer.h"
+#include "cuda.h"
+#include "blas.h"
+#include "activations.h"
+
+#include <stdio.h>
+#include <assert.h>
+
+
+
+/******************************************************************************************
+*  func：构建shotcut类型网络层                                                            *
+*  args batch：该层的batch大小,与网络的batch大小一致                                      *
+*  args index：shotcut来自于哪一层网络，从0开始                                           *
+*  args w：该层的上层网络的输出的width                                                    *
+*  args h：该层的上层网络的输出的height                                                   *
+*  args c：该层的上层网络的输出的channels                                                 *
+*  args w2：shotcut源层的width                                                            *
+*  args h2：shotcut源层的height                                                           *
+*  args c2：shotcut源层的channels                                                         *
+******************************************************************************************/
+layer make_shortcut_layer(int batch, int index, int w, int h, int c, int w2, int h2, int c2)
+{
+	// layer from = net->layers[index];
+    // layer s = make_shortcut_layer(batch, index, params.w, params.h, params.c, from.out_w, from.out_h, from.out_c);
+    fprintf(stderr, "res  %3d                %4d x%4d x%4d   ->  %4d x%4d x%4d\n",index, w2,h2,c2, w,h,c);
+	// 初始化层的一些基本信息
+    layer l = {0};
+    l.type = SHORTCUT;
+    l.batch = batch;
+    l.w = w2;
+    l.h = h2;
+    l.c = c2;
+    l.out_w = w;
+    l.out_h = h;
+    l.out_c = c;
+    l.outputs = w*h*c;
+    l.inputs = l.outputs;
+
+	// 以第一个res为例：此时index为1
+    l.index = index;
+
+    l.delta =  calloc(l.outputs*batch, sizeof(float));
+    l.output = calloc(l.outputs*batch, sizeof(float));;
+
+	// 该层前向和后向的传递函数，本文件
+    l.forward = forward_shortcut_layer;
+    l.backward = backward_shortcut_layer;
+    #ifdef GPU
+    l.forward_gpu = forward_shortcut_layer_gpu;
+    l.backward_gpu = backward_shortcut_layer_gpu;
+
+    l.delta_gpu =  cuda_make_array(l.delta, l.outputs*batch);
+    l.output_gpu = cuda_make_array(l.output, l.outputs*batch);
+    #endif
+    return l;
+}
+
+void resize_shortcut_layer(layer *l, int w, int h)
+{
+    assert(l->w == l->out_w);
+    assert(l->h == l->out_h);
+    l->w = l->out_w = w;
+    l->h = l->out_h = h;
+    l->outputs = w*h*l->out_c;
+    l->inputs = l->outputs;
+    l->delta =  realloc(l->delta, l->outputs*l->batch*sizeof(float));
+    l->output = realloc(l->output, l->outputs*l->batch*sizeof(float));
+
+#ifdef GPU
+    cuda_free(l->output_gpu);
+    cuda_free(l->delta_gpu);
+    l->output_gpu  = cuda_make_array(l->output, l->outputs*l->batch);
+    l->delta_gpu   = cuda_make_array(l->delta,  l->outputs*l->batch);
+#endif
+    
+}
+
+
+
+/**********************************************************************
+*  func: 完成shotcut层的前向传递功能                                  *
+*  args layer:
+**********************************************************************/
+void forward_shortcut_layer(const layer l, network net)
+{
+	// copy_cpu函数：src/blas.c 将net.input函数中的元素拷贝到l.output中去，参数0为input的元素个数，参数2为input的步长，参数4为output的步长
+    copy_cpu(l.outputs*l.batch, net.input, 1, l.output, 1);
+	// shortcut_cpu函数：src/blas.c 
+    shortcut_cpu(l.batch, l.w, l.h, l.c, net.layers[l.index].output, l.out_w, l.out_h, l.out_c, l.alpha, l.beta, l.output);
+    activate_array(l.output, l.outputs*l.batch, l.activation);
+}
+
+void backward_shortcut_layer(const layer l, network net)
+{
+    gradient_array(l.output, l.outputs*l.batch, l.activation, l.delta);
+    axpy_cpu(l.outputs*l.batch, l.alpha, l.delta, 1, net.delta, 1);
+    shortcut_cpu(l.batch, l.out_w, l.out_h, l.out_c, l.delta, l.w, l.h, l.c, 1, l.beta, net.layers[l.index].delta);
+}
+
+#ifdef GPU
+void forward_shortcut_layer_gpu(const layer l, network net)
+{
+    copy_gpu(l.outputs*l.batch, net.input_gpu, 1, l.output_gpu, 1);
+    shortcut_gpu(l.batch, l.w, l.h, l.c, net.layers[l.index].output_gpu, l.out_w, l.out_h, l.out_c, l.alpha, l.beta, l.output_gpu);
+    activate_array_gpu(l.output_gpu, l.outputs*l.batch, l.activation);
+}
+
+void backward_shortcut_layer_gpu(const layer l, network net)
+{
+    gradient_array_gpu(l.output_gpu, l.outputs*l.batch, l.activation, l.delta_gpu);
+    axpy_gpu(l.outputs*l.batch, l.alpha, l.delta_gpu, 1, net.delta_gpu, 1);
+    shortcut_gpu(l.batch, l.out_w, l.out_h, l.out_c, l.delta_gpu, l.w, l.h, l.c, 1, l.beta, net.layers[l.index].delta_gpu);
+}
+#endif

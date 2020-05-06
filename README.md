@@ -8,7 +8,7 @@
 
 MobileNet-YOLOv3
 linux的caffe：https://github.com/eric612/MobileNet-YOLO
-windows的实现caffe：https://github.com/eric612/Caffe-YOLOv3-Windows 
+windows的caffe：https://github.com/eric612/Caffe-YOLOv3-Windows 
 
 keras版本：这个我训练时候出现val_loss错误暂时没解决https://github.com/Adamdad/keras-YOLOv3-mobilenet，后面我们通过对train文件的代码修改的数据切分的部分，目前改模型可以实现工程应用。想要修改版本的代码请您联系我。
 

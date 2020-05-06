@@ -20,7 +20,6 @@ https://github.com/sufeidechabei/gluon-mobilenet-yolov3
 NCS2上部署yolo_tiny，这个模型是为了让工程化变得简单后续我们使用相关训练和在ARM上的部署方案供大家使用和研究。
 https://mp.weixin.qq.com/s/kjii53YgOSFCA84Tbl6K0Q
 
-
 ![](https://github.com/Eric3911/Darknet-YOLOv3/blob/master/pred_input.jpg)
 ![](https://github.com/Eric3911/Darknet-YOLOv3/blob/master/pred_output.jpg)
 

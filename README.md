@@ -1,6 +1,8 @@
 
 ### Darknet版YOLOv3教程
 
+# relatework
+https://github.com/Eric3911/yolov3_keras
 
 ### 温馨提示
 如果出现了模型的label不显示可以修改主程序里面把加载coco那段代码改成voc就可以

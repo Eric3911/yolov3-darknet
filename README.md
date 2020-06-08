@@ -9,11 +9,8 @@
 
 # relatework
 
-keras 
+  keras的版本：https://github.com/Eric3911/yolov3_keras
 
-  https://github.com/Eric3911/yolov3_keras
-  
-  keras原版本：https://github.com/Adamdad/keras-YOLOv3-mobilenet，
   
   keras改进版：https://github.com/Eric3911/YOLOv3-Mobilenet
 
